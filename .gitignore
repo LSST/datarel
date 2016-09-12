@@ -1,3 +1,4 @@
+_build.*
 tests/visitim
 tests/sdqaAmp
 tests/sdqaCcd
@@ -21,7 +22,9 @@ doc/html
 doc/*.tag
 doc/*.inc
 doc/doxygen.conf
+doc/xml
 tests/.tests
+tests/.cache
 version.py
 psf/
 bin/trimRegistry.py

@@ -123,7 +123,7 @@ class CsvGenerator(object):
                     urc.getRa().asDegrees(), urc.getDec().asDegrees(),
                     lrc.getRa().asDegrees(), lrc.getDec().asDegrees(),
                     obsStart.get(dafBase.DateTime.MJD, dafBase.DateTime.TAI),
-                    obsStart, obsMidpoint.toString(), expTime,
+                    obsStart, obsMidpoint.toString(dafBase.DateTime.UTC), expTime,
                     md.get('AIRMASS'), md.get('DARKTIME'),
                     None) # ZENITH is missing
             for name in md.paramNames():

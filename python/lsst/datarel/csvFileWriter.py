@@ -24,7 +24,7 @@ class CsvFileWriter(object):
             value = re.sub(r'"', r'\"', value)
             return '"' + value.strip() + '"'
         if isinstance(value, dafBase.DateTime):
-            value = value.toString()
+            value = value.toString(dafBase.DateTime.UTC)
             return '"' + value[0:10] + ' ' + value[11:19] + '"'
         return str(value)
 

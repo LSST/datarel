@@ -69,7 +69,7 @@ class Column(object):
                     "SELECT %sValue FROM %s WHERE metadataKey='%s' AND %sValue != '%s' LIMIT 1;" %
                     (self.type, metadataTable, self.name, self.type, val))
                 rows = cursor.fetchone()
-                if rows == None or len(rows) == 0:
+                if rows is None or len(rows) == 0:
                     self.constVal = val
         else:
             cursor.execute("SELECT MIN(%sValue), MAX(%sValue) FROM %s WHERE metadataKey='%s';" %
@@ -115,7 +115,7 @@ class OutputTable(object):
 
     def create(self, cursor, metadataTable):
         createStmt = "CREATE TABLE %s (\n    %s BIGINT NOT NULL PRIMARY KEY" % (self.name, self.idCol)
-        cols = ",\n".join([c.getColumnSpec() for c in self.columns if c.constVal == None])
+        cols = ",\n".join([c.getColumnSpec() for c in self.columns if c.constVal is None])
         if len(cols) > 0:
             createStmt += ",\n"
             createStmt += cols
@@ -123,11 +123,11 @@ class OutputTable(object):
         print(createStmt)
         cursor.execute(createStmt)
         cursor.fetchall()
-        if any(c.constVal != None for c in self.columns):
+        if any(c.constVal is not None for c in self.columns):
             # Create a VIEW which provides columns for metadataKeys with constant values
             viewStmt = "CREATE VIEW %s_View AS SELECT *" % self.name
             for c in self.columns:
-                if c.constVal != None:
+                if c.constVal is not None:
                     viewStmt += ",\n    "
                     if c.type == "string":
                         viewStmt += "'%s' AS %s" % (c.constVal, c.getDbName())
@@ -146,7 +146,7 @@ class OutputTable(object):
                        (self.name, self.idCol, self.idCol, metadataTable))
         cursor.fetchall()
         for c in self.columns:
-            if c.constVal == None:
+            if c.constVal is None:
                 print("Storing values for " + c.name)
                 cursor.execute(
                     """UPDATE %s AS a INNER JOIN %s AS b
@@ -247,7 +247,7 @@ def main():
     else:
         passwd = getpass.getpass("%s's MySQL password: " % ns.user)
     skipCols = set()
-    if opts.skipKeys != None:
+    if opts.skipKeys is not None:
         skipCols = set(map(lambda x: x.strip(), opts.skipKeys.split(",")))
     run(ns.host, ns.port, ns.user, passwd, db, metadataTable,
         idCol, outputTable, skipCols, ns.compress)

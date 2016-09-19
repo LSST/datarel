@@ -41,7 +41,7 @@ def getDataset(butler, dataset, dataId, strict, warn):
         ds = butler.get(dataset, dataId=dataId, immediate=True)
     except:
         ds = None
-    if ds == None:
+    if ds is None:
         msg = '{} : Failed to retrieve {} dataset'.format(dataId, dataset)
         if strict:
             raise RuntimeError(msg)

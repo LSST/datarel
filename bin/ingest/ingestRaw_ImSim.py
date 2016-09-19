@@ -256,9 +256,9 @@ def main():
         "must exist in each input root.")
     parser.add_argument("root", help="input root directory")
     ns = parser.parse_args()
-    doLoad = ns.database != None
+    doLoad = ns.database is not None
     if doLoad:
-        if ns.user == None:
+        if ns.user is None:
             parser.error("No database user name specified and $USER " +
                          "is undefined or empty")
         sql = MysqlExecutor(ns.host, ns.database, ns.user, ns.port)

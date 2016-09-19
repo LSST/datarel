@@ -38,7 +38,7 @@ def main():
     parser.add_argument("database", help="Name of database to \"link\" from.")
     ns = parser.parse_args()
     print(ns)
-    if ns.user == None:
+    if ns.user is None:
         parser.error("No database user name specified and $USER is undefined or empty")
     viewName = "buildbot_weekly_latest_" + ns.type
     print(viewName)

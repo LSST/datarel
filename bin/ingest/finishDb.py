@@ -157,7 +157,7 @@ def main():
     parser.add_argument("database", help="Name of database to post-process.")
 
     ns = parser.parse_args()
-    if ns.user == None:
+    if ns.user is None:
         parser.error("No database user name specified and $USER is undefined or empty")
     sql = MysqlExecutor(ns.host, ns.database, ns.user, ns.port)
     camera = ns.camera.lower()

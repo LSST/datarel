@@ -39,7 +39,7 @@ class MysqlExecutor(object):
         self.port = port
         self.user = user
         self.database = database
-        if password == None:
+        if password is None:
             if self.host is not None and self.port is not None and \
                     DbAuth.available(self.host, str(self.port)):
                 self.user = DbAuth.username(self.host, str(self.port))

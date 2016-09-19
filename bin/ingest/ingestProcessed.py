@@ -328,13 +328,13 @@ def main():
             ns.camera, _validKeys.keys()))
     ns.rules = makeRules(ns.id, ns.camera, _validKeys[ns.camera])
     sql = None
-    doLoad = ns.database != None
+    doLoad = ns.database is not None
     dirs = set(os.path.realpath(d) for d in ns.inroot)
     if len(dirs) != len(ns.inroot):
         parser.error('Input roots are not distinct (check for symlinks '
                      'to the same physical directory!)')
     if doLoad:
-        if ns.user == None:
+        if ns.user is None:
             parser.error('No database user name specified and $USER '
                          'is undefined or empty')
         sql = MysqlExecutor(ns.host, ns.database, ns.user, ns.port)

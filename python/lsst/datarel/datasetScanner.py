@@ -23,6 +23,7 @@ import os
 import os.path
 import re
 import lsst.daf.butlerUtils
+from functools import reduce
 
 __all__ = ['getMapperClass',
            'parseDataIdRules',
@@ -246,7 +247,7 @@ class HfsScanner(object):
                 simple = False
                 spec = m.group(0)
                 k = m.group(1)
-                seenBefore = self._formatKeys.has_key(k)
+                seenBefore = k in self._formatKeys
                 # transform format spec into a regular expression
                 regex += re.escape(component[last:m.start(0)])
                 last = m.end(0)

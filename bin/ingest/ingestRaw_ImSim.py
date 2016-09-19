@@ -22,6 +22,7 @@
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
+from __future__ import print_function
 import argparse
 import os
 import subprocess
@@ -39,7 +40,7 @@ from lsst.datarel.mysqlExecutor import MysqlExecutor, addDbOptions
 
 
 if not 'SCISQL_DIR' in os.environ:
-    print >>sys.stderr, "Please setup the scisql package and try again"
+    print("Please setup the scisql package and try again", file=sys.stderr)
     sys.exit(1)
 
 scisqlIndex = os.path.join(os.environ['SCISQL_DIR'], 'bin', 'scisql_index')
@@ -108,10 +109,10 @@ class CsvGenerator(object):
                                                   visit=visit, snap=snap,
                                                   raft=raft, sensor=sensor, channel=channel)
                     except:
-                        print ("*** Unable to read metadata for " +
+                        print(("*** Unable to read metadata for " +
                                "visit %d snap %d " +
                                "raft %s sensor %s channel %s") % \
-                            (visit, snap, raft, sensor, channel)
+                            (visit, snap, raft, sensor, channel))
                         continue
 
                     self.rToSFile.write(rawAmpExposureId, sciCcdExposureId,
@@ -132,7 +133,7 @@ class CsvGenerator(object):
                                                 dafBase.DateTime.MJD, dafBase.DateTime.UTC)
                     expTime = md.get('EXPTIME')
                     obsMidpoint = dafBase.DateTime(obsStart.nsecs() +
-                                                   long(expTime * 1000000000L / 2))
+                                                   long(expTime * 1000000000 / 2))
                     filterName = md.get('FILTER').strip()
                     self.expFile.write(rawAmpExposureId,
                                        visit, snap, raftNum, raft, ccdNum,
@@ -179,7 +180,7 @@ class CsvGenerator(object):
                         repr(corner4.getRa().asDegrees()), repr(corner4.getDec().asDegrees())]))
                     self.polyFile.write("\n")
 
-        print "Processed visit %d raft %s sensor %s" % (visit, raft, sensor)
+        print("Processed visit %d raft %s sensor %s" % (visit, raft, sensor))
 
 
 def dbLoad(sql):

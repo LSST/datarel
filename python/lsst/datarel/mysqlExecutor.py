@@ -21,6 +21,7 @@
 #
 
 from __future__ import with_statement
+from __future__ import print_function
 from contextlib import closing
 import getpass
 import MySQLdb as sql
@@ -99,7 +100,7 @@ class MysqlExecutor(object):
             raise TypeError('Query is not a string')
         with closing(self.getConn()) as conn:
             with closing(conn.cursor()) as cursor:
-                print query
+                print(query)
                 sys.stdout.flush()
                 cursor.execute(query)
                 return cursor.fetchall()
@@ -138,7 +139,7 @@ class MysqlExecutor(object):
 def addDbOptions(parser):
     if not isinstance(parser, argparse.ArgumentParser):
         raise TypeError('Expecting an argparse.ArgumentParser')
-    defUser = (os.environ.has_key('USER') and os.environ['USER']) or None
+    defUser = ('USER' in os.environ and os.environ['USER']) or None
     parser.add_argument(
         "--user", default=defUser, dest="user",
         help="MySQL database user name (%(default)s).")

@@ -40,6 +40,7 @@ to dataset, although they can be reordered.
 """
 
 from __future__ import with_statement
+from __future__ import print_function
 from optparse import OptionParser
 import os
 import shutil
@@ -78,7 +79,7 @@ def rowGenerator(inputData):
                 val = words[i][pos + 1:]
                 if rowNum <= 1:
                     if key in cols:
-                        raise RuntimeError, "Duplicate key: %s" % (key,)
+                        raise RuntimeError("Duplicate key: %s" % (key,))
                     if key in intIds:
                         cols[key] = -i
                     else:
@@ -101,13 +102,13 @@ def main(inputRegistry, outputRegistry, inputData):
     the inputData pathname to select rows out of the registry."""
 
     if not os.path.exists(inputRegistry):
-        raise RuntimeError, "Registry not found"
+        raise RuntimeError("Registry not found")
     if os.path.exists(outputRegistry):
-        raise RuntimeError, "Output registry already exists"
+        raise RuntimeError("Output registry already exists")
     shutil.copyfile(inputRegistry, outputRegistry)
     with sqlite3.connect(outputRegistry) as db:
         gen = rowGenerator(inputData)
-        cols = gen.next()
+        cols = next(gen)
         schema = [None for _ in xrange(len(cols))]
         for k, v in cols.iteritems():
             if v < 0:
@@ -115,59 +116,59 @@ def main(inputRegistry, outputRegistry, inputData):
             else:
                 schema[v-1] = "%s TEXT" % (k,)
         cmd = "CREATE TABLE selector (" + ", ".join(schema) + ")"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "INSERT INTO selector VALUES (" + ", ".join(["?" for _ in
                                                            xrange(len(cols))]) + ")"
-        print cmd
+        print(cmd)
         db.executemany(cmd, gen)
         cmd = "CREATE TABLE new_raw AS " + \
             "SELECT raw.* FROM raw, selector WHERE " + " AND ".join(
                 ["raw.%s = selector.%s" % (col, col)
                  for col in cols.iterkeys()])
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "CREATE TABLE new_raw_skyTile AS " + \
             "SELECT * from raw_skyTile " + \
             "WHERE id IN (SELECT id FROM new_raw)"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "CREATE TABLE new_raw_visit AS " + \
             "SELECT * from raw_visit " + \
             "WHERE visit IN (SELECT DISTINCT visit FROM new_raw)"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "CREATE UNIQUE INDEX pk_id ON new_raw (id)"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "CREATE UNIQUE INDEX pk_visit ON new_raw_visit (visit)"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         db.commit()
 
         cmd = "DROP TABLE raw"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "DROP TABLE raw_skyTile"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "DROP TABLE raw_visit"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "DROP TABLE selector"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "ALTER TABLE new_raw RENAME TO raw"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "ALTER TABLE new_raw_skyTile RENAME TO raw_skyTile"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "ALTER TABLE new_raw_visit RENAME TO raw_visit"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "VACUUM"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         db.commit()
 
@@ -184,5 +185,5 @@ INPUTDATA is an input file for the job office.""")
         parser.error("Missing input registry or input data file")
     inputData = args[1]
     if not os.path.exists(inputData):
-        raise RuntimeError, "Missing input data file: %s" % (inputData,)
+        raise RuntimeError("Missing input data file: %s" % (inputData,))
     main(args[0], options.output, inputData)

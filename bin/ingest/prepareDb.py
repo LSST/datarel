@@ -22,6 +22,7 @@
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 from __future__ import with_statement
+from __future__ import print_function
 import argparse
 import os
 
@@ -59,8 +60,8 @@ def checkDb(sql, camera):
         try:
             result = sql.runQuery("SELECT COUNT(*) FROM " + table)
             if result[0][0] != 0:
-                print "WARNING: non-empty table " + table
-        except Exception, e:
+                print("WARNING: non-empty table " + table)
+        except Exception as e:
             if hasattr(e, "__getitem__") and e[0] == 1049:
                 return False
             else:

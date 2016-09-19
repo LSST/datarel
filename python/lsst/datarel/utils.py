@@ -1,3 +1,4 @@
+from __future__ import print_function
 #
 # LSST Data Management System
 # Copyright 2008, 2009, 2010 LSST Corporation.
@@ -45,7 +46,7 @@ def getDataset(butler, dataset, dataId, strict, warn):
         if strict:
             raise RuntimeError(msg)
         elif warn:
-            print >>sys.stderr, '*** Skipping ' + msg
+            print('*** Skipping ' + msg, file=sys.stderr)
     return ds
 
 
@@ -72,5 +73,5 @@ def getPsf(butler, dataset, dataId, strict, warn):
         if strict:
             raise RuntimeError(msg)
         elif warn:
-            print >>sys.stderr, '*** Skipping ' + msg
+            print('*** Skipping ' + msg, file=sys.stderr)
     return psf

@@ -22,6 +22,7 @@
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
+from __future__ import print_function
 import argparse
 import os
 import string
@@ -132,9 +133,9 @@ def findInconsistentMetadataTypes(sql, camera):
             HAVING n > 1;
             """, table))
         if len(keys) > 0:
-            print table + " has inconsistent types for metadata keys:"
+            print(table + " has inconsistent types for metadata keys:")
             for k in keys:
-                print "{}:\t{}".format(k[0], k[2])
+                print("{}:\t{}".format(k[0], k[2]))
             sys.stdout.flush()
             needsFix.append(table)
     return needsFix
@@ -174,17 +175,17 @@ def main():
     # fixup metadata tables if necessary
     fixTables = findInconsistentMetadataTypes(sql, camera)
     if len(fixTables) > 0:
-        print "\nattempting to fix type inconsistencies"
+        print("\nattempting to fix type inconsistencies")
     for table in fixTables:
         stmt = fixupTemplate.substitute({"table": table})
         sql.execStmt(stmt)
     if len(fixTables) > 0:
-        print "\nVerifying that all inconsistencies were fixed..."
+        print("\nVerifying that all inconsistencies were fixed...")
         fixTables = findInconsistentMetadataTypes(sql, camera)
     if len(fixTables) > 0:
-        print "\n... inconsistencies remain!"
+        print("\n... inconsistencies remain!")
         if ns.transpose:
-            print "\nCannot transpose metadata tables with inconsistent types!"
+            print("\nCannot transpose metadata tables with inconsistent types!")
     elif ns.transpose:
         # Generate transposed metadata tables
         if "Raw_Amp_Exposure_Metadata" in metadataTables[camera]:

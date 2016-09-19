@@ -22,6 +22,7 @@
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
+from __future__ import print_function
 import argparse
 import os
 import subprocess
@@ -39,7 +40,7 @@ from lsst.datarel.mysqlExecutor import MysqlExecutor, addDbOptions
 
 
 if not 'SCISQL_DIR' in os.environ:
-    print >>sys.stderr, "Please setup the scisql package and try again"
+    print("Please setup the scisql package and try again", file=sys.stderr)
     sys.exit(1)
 
 scisqlIndex = os.path.join(os.environ['SCISQL_DIR'], 'bin', 'scisql_index')
@@ -89,8 +90,8 @@ class CsvGenerator(object):
             try:
                 md = self.getFullMetadata("raw", visit=visit, ccd=ccd, amp=amp)
             except:
-                print ("*** Unable to read metadata for " +
-                       "visit %d ccd %d amp %d") % (visit, ccd, amp)
+                print(("*** Unable to read metadata for " +
+                       "visit %d ccd %d amp %d") % (visit, ccd, amp))
                 continue
 
             self.rToSFile.write(rawAmpExposureId, sciCcdExposureId, 0, amp)
@@ -108,7 +109,7 @@ class CsvGenerator(object):
                                         dafBase.DateTime.MJD, dafBase.DateTime.UTC)
             expTime = md.get('EXPTIME')
             obsMidpoint = dafBase.DateTime(obsStart.nsecs() +
-                                           long(expTime * 1000000000L / 2))
+                                           long(expTime * 1000000000 / 2))
             self.expFile.write(rawAmpExposureId,
                                visit, 0, 0, ccd, amp,
                                filterMap.index(md.get('FILTER').strip()),
@@ -146,7 +147,7 @@ class CsvGenerator(object):
                 repr(lrc.getRa().asDegrees()), repr(lrc.getDec().asDegrees())]))
             self.polyFile.write("\n")
 
-        print "Processed visit %d ccd %d" % (visit, ccd)
+        print("Processed visit %d ccd %d" % (visit, ccd))
 
 
 def dbLoad(sql):

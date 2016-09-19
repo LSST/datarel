@@ -22,6 +22,7 @@
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
+from __future__ import print_function
 import math
 import argparse
 import os
@@ -48,7 +49,7 @@ except:
     pass
 
 if not 'SCISQL_DIR' in os.environ:
-    print >>sys.stderr, 'Please setup the scisql package and try again'
+    print('Please setup the scisql package and try again', file=sys.stderr)
     sys.exit(1)
 
 scisqlIndex = os.path.join(os.environ['SCISQL_DIR'], 'bin', 'scisql_index')
@@ -91,7 +92,7 @@ class CsvGenerator(object):
         cursor = conn.cursor() if conn else None
         # Loop over input roots
         for root in self.namespace.inroot:
-            print 'Ingesting from ' + root
+            print('Ingesting from ' + root)
             if hasattr(self.namespace, 'registry'):
                 registry = self.namespace.registry
             else:
@@ -122,7 +123,7 @@ class CsvGenerator(object):
         if os.stat(filename).st_size < minExposureSize[self.camera]:
             msg = '{} : too small, possibly corrupt'.format(dataId)
             if not self.namespace.strict:
-                print >>sys.stderr, '*** Skipping ' + msg
+                print('*** Skipping ' + msg, file=sys.stderr)
                 return
             else:
                 raise RuntimeError(msg)
@@ -135,7 +136,7 @@ class CsvGenerator(object):
             if cursor.fetchall()[0][0] == 1:
                 msg = '{} : already loaded'.format(dataId)
                 if not self.namespace.strict:
-                    print >>sys.stderr, '*** Skipping ' + msg
+                    print('*** Skipping ' + msg, file=sys.stderr)
                     return
                 else:
                     raise RuntimeError(msg)
@@ -227,7 +228,7 @@ class CsvGenerator(object):
             repr(corner3.getRa().asDegrees()), repr(corner3.getDec().asDegrees()),
             repr(corner4.getRa().asDegrees()), repr(corner4.getDec().asDegrees())]))
         self.polyFile.write('\n')
-        print 'Processed {}'.format(dataId)
+        print('Processed {}'.format(dataId))
 
 
 def dbLoad(ns, sql):

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import gzip
 import re
 import lsst.daf.base as dafBase
@@ -31,4 +32,4 @@ class CsvFileWriter(object):
         return str(value)
 
     def write(self, *fields):
-        print >>self.f, ",".join([self.quote(field) for field in fields])
+        print(",".join([self.quote(field) for field in fields]), file=self.f)

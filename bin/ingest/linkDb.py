@@ -22,6 +22,7 @@
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
+from __future__ import print_function
 import argparse
 
 from lsst.datarel.mysqlExecutor import MysqlExecutor, addDbOptions
@@ -36,11 +37,11 @@ def main():
         help="Type of stack which generated DB")
     parser.add_argument("database", help="Name of database to \"link\" from.")
     ns = parser.parse_args()
-    print ns
+    print(ns)
     if ns.user == None:
         parser.error("No database user name specified and $USER is undefined or empty")
     viewName = "buildbot_weekly_latest_" + ns.type
-    print viewName
+    print(viewName)
     sql = MysqlExecutor(ns.host, viewName, ns.user, ns.port)
     for table in (
             "AmpMap", "CcdMap", "Filter", "LeapSeconds", "Logs",

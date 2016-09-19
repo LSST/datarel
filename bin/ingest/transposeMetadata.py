@@ -22,6 +22,7 @@
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 from __future__ import with_statement
+from __future__ import print_function
 from contextlib import closing
 import getpass
 import argparse
@@ -47,7 +48,7 @@ class Column(object):
         self.constVal = None
 
     def computeAttributes(self, cursor, metadataTable, compress):
-        print "Computing attributes for metadataKey: " + self.name
+        print("Computing attributes for metadataKey: " + self.name)
         cursor.execute(
             "SELECT count(*) FROM %s WHERE metadataKey='%s' AND %sValue IS NULL;" %
             (metadataTable, self.name, self.type))
@@ -119,7 +120,7 @@ class OutputTable(object):
             createStmt += ",\n"
             createStmt += cols
         createStmt += "\n);"
-        print createStmt
+        print(createStmt)
         cursor.execute(createStmt)
         cursor.fetchall()
         if any(c.constVal != None for c in self.columns):
@@ -135,18 +136,18 @@ class OutputTable(object):
                     else:
                         viewStmt += "%s AS %s" % (str(c.constVal), c.getDbName())
             viewStmt += "\nFROM %s;" % metadataTable
-            print viewStmt
+            print(viewStmt)
             cursor.execute(viewStmt)
             cursor.fetchall()
 
     def populate(self, cursor, metadataTable):
-        print "Storing " + self.idCol + " values"
+        print("Storing " + self.idCol + " values")
         cursor.execute("INSERT INTO %s (%s) SELECT DISTINCT %s FROM %s;" %
                        (self.name, self.idCol, self.idCol, metadataTable))
         cursor.fetchall()
         for c in self.columns:
             if c.constVal == None:
-                print "Storing values for " + c.name
+                print("Storing values for " + c.name)
                 cursor.execute(
                     """UPDATE %s AS a INNER JOIN %s AS b
                        ON (a.%s = b.%s AND b.metadataKey = '%s')

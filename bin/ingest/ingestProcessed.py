@@ -48,7 +48,7 @@ try:
 except:
     pass
 
-if not 'SCISQL_DIR' in os.environ:
+if 'SCISQL_DIR' not in os.environ:
     print('Please setup the scisql package and try again', file=sys.stderr)
     sys.exit(1)
 

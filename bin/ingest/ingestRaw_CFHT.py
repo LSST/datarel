@@ -39,7 +39,7 @@ from lsst.datarel.csvFileWriter import CsvFileWriter
 from lsst.datarel.mysqlExecutor import MysqlExecutor, addDbOptions
 
 
-if not 'SCISQL_DIR' in os.environ:
+if 'SCISQL_DIR' not in os.environ:
     print("Please setup the scisql package and try again", file=sys.stderr)
     sys.exit(1)
 

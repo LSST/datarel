@@ -2,7 +2,9 @@ import gzip
 import re
 import lsst.daf.base as dafBase
 
+
 class CsvFileWriter(object):
+
     def __init__(self, path, overwrite=True, compress=True):
         if compress:
             self.f = gzip.open(path + ".gz", "w" if overwrite else "a")

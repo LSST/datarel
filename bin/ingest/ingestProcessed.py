@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-# 
+#
 # LSST Data Management System
 # Copyright 2012 LSST Corporation.
-# 
+#
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
 #
@@ -11,14 +11,14 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
-# You should have received a copy of the LSST License Statement and 
-# the GNU General Public License along with this program.  If not, 
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
@@ -58,7 +58,7 @@ bytesPerPixel = 4 + 2 + 4
 
 # Camera specific minimum file sizes for calexp FITS files.
 # Obtained by multiplying the expected calexp dimensions by the total number
-# of bytes required per pixel. 
+# of bytes required per pixel.
 minExposureSize = {
     'lsstsim': bytesPerPixel*4000*4000,
     'sdss': bytesPerPixel*2048*1361,
@@ -67,6 +67,7 @@ minExposureSize = {
 
 
 class CsvGenerator(object):
+
     def __init__(self, namespace, compress=True):
         self.namespace = namespace
         self.camera = namespace.camera
@@ -119,7 +120,7 @@ class CsvGenerator(object):
         """
         filename = os.path.join(root, path)
         if os.stat(filename).st_size < minExposureSize[self.camera]:
-            msg = '{} : too small, possibly corrupt'.format(dataId) 
+            msg = '{} : too small, possibly corrupt'.format(dataId)
             if not self.namespace.strict:
                 print >>sys.stderr, '*** Skipping ' + msg
                 return
@@ -164,10 +165,10 @@ class CsvGenerator(object):
                 md.get('MJD-OBS'), dafBase.DateTime.MJD, dafBase.DateTime.UTC)
             record.append(dataId['visit'])
             if self.camera == 'lsstsim':
-                record.extend([dataId['raftId'], dataId['raft'], dataId['sensorNum'], dataId['sensor'],])
+                record.extend([dataId['raftId'], dataId['raft'], dataId['sensorNum'], dataId['sensor'], ])
             else:
                 # CFHT camera doesn't have rafts
-                record.extend([dataId['ccd'], dataId['ccdName'],])
+                record.extend([dataId['ccd'], dataId['ccdName'], ])
             record.extend([filterId, filterName])
         elif self.camera == 'sdss':
             filterId = afwImage.Filter(dataId['filter'], False).getId()
@@ -205,7 +206,7 @@ class CsvGenerator(object):
         ])
         if self.camera in ('lsstsim', 'cfht'):
             # SDSS calexps do not go through CCD assembly/ISR, so these keys aren't available
-            record.extend([md.get('RDNOISE'), md.get('SATURATE'), md.get('GAINEFF'),])
+            record.extend([md.get('RDNOISE'), md.get('SATURATE'), md.get('GAINEFF'), ])
         # Append zero point, FWHM, and relative FITS file path
         record.extend([md.get('FLUXMAG0'), md.get('FLUXMAG0ERR'), fwhm, path])
         # Write out CSV record for exposure
@@ -220,11 +221,11 @@ class CsvGenerator(object):
                 self.mdFile.write(scienceCcdExposureId, name, 1, None, None, str(md.get(name)))
         # Write out 4 corner TSV record.
         self.polyFile.write('\t'.join([
-                str(scienceCcdExposureId),
-                repr(corner1.getRa().asDegrees()), repr(corner1.getDec().asDegrees()),
-                repr(corner2.getRa().asDegrees()), repr(corner2.getDec().asDegrees()),
-                repr(corner3.getRa().asDegrees()), repr(corner3.getDec().asDegrees()),
-                repr(corner4.getRa().asDegrees()), repr(corner4.getDec().asDegrees())]))
+            str(scienceCcdExposureId),
+            repr(corner1.getRa().asDegrees()), repr(corner1.getDec().asDegrees()),
+            repr(corner2.getRa().asDegrees()), repr(corner2.getDec().asDegrees()),
+            repr(corner3.getRa().asDegrees()), repr(corner3.getDec().asDegrees()),
+            repr(corner4.getRa().asDegrees()), repr(corner4.getDec().asDegrees())]))
         self.polyFile.write('\n')
         print 'Processed {}'.format(dataId)
 
@@ -244,7 +245,7 @@ def dbLoad(ns, sql):
         FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' (
             scienceCcdExposureId,
             """,
-        os.path.abspath(os.path.join(ns.outroot, 'Science_Ccd_Exposure.csv')))
+                          os.path.abspath(os.path.join(ns.outroot, 'Science_Ccd_Exposure.csv')))
     # ... ID columns are camera specific
     if camera == 'lsstsim':
         loadStmt += 'visit, raft, raftName, ccd, ccdName, filterId, filterName,'
@@ -311,15 +312,14 @@ _validKeys = {
 
 
 def main():
-    parser = makeArgumentParser(description=
-        'Converts processed single frame exposure metadata to CSV files '
-        'suitable for loading into MySQL. If a database name is given, '
-        'the CSVs are also loaded into that database. Make sure to run '
-        'prepareDb.py with the appropriate --camera argument before '
-        'database loads - this instantiates the camera specific LSST '
-        'schema in the target database.')
+    parser = makeArgumentParser(description='Converts processed single frame exposure metadata to CSV files '
+                                'suitable for loading into MySQL. If a database name is given, '
+                                'the CSVs are also loaded into that database. Make sure to run '
+                                'prepareDb.py with the appropriate --camera argument before '
+                                'database loads - this instantiates the camera specific LSST '
+                                'schema in the target database.')
     parser.add_argument("--camera", dest="camera", default="lsstSim",
-        help="Name of desired camera (defaults to %(default)s)")
+                        help="Name of desired camera (defaults to %(default)s)")
     ns = parser.parse_args()
     ns.camera = ns.camera.lower()
     if ns.camera not in _validKeys:
@@ -332,7 +332,7 @@ def main():
     if len(dirs) != len(ns.inroot):
         parser.error('Input roots are not distinct (check for symlinks '
                      'to the same physical directory!)')
-    if doLoad :
+    if doLoad:
         if ns.user == None:
             parser.error('No database user name specified and $USER '
                          'is undefined or empty')
@@ -345,4 +345,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

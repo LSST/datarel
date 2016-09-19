@@ -1,9 +1,9 @@
 #! /usr/bin/env python
 
-# 
+#
 # LSST Data Management System
 # Copyright 2008, 2009, 2010 LSST Corporation.
-# 
+#
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
 #
@@ -11,14 +11,14 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
-# You should have received a copy of the LSST License Statement and 
-# the GNU General Public License along with this program.  If not, 
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 from __future__ import with_statement
@@ -41,16 +41,16 @@ loadTables = {
                 "Raw_Amp_To_Science_Ccd_Exposure",
                 "Raw_Amp_Exposure_To_Htm11",
                 "Raw_Amp_To_Science_Ccd_Exposure",
-               ],
-    "sdss":    ["Source",
-                "Object",
-                "RefObject",
-                "RefObjMatch",
-                "RefSrcMatch",
-                "Science_Ccd_Exposure",
-                "Science_Ccd_Exposure_Metadata",
-                "Science_Ccd_Exposure_To_Htm10"
-               ],
+                ],
+    "sdss": ["Source",
+             "Object",
+             "RefObject",
+             "RefObjMatch",
+             "RefSrcMatch",
+             "Science_Ccd_Exposure",
+             "Science_Ccd_Exposure_Metadata",
+             "Science_Ccd_Exposure_To_Htm10"
+             ],
 }
 
 
@@ -67,15 +67,16 @@ def checkDb(sql, camera):
                 raise e
     return True
 
+
 def main():
-    parser = argparse.ArgumentParser(description=
-        "Program which creates an LSST run database and instantiates the LSST "
-        "schema therein. Indexes on tables which will be loaded by the various "
-        "datarel ingest scripts are disabled. Once loading has finished, the "
-        "finishDb.py script should be run to re-enable them.")
+    parser = argparse.ArgumentParser(description="Program which creates an LSST run database and "
+                                     "instantiates the LSST "
+                                     "schema therein. Indexes on tables which will be loaded by the various "
+                                     "datarel ingest scripts are disabled. Once loading has finished, the "
+                                     "finishDb.py script should be run to re-enable them.")
     addDbOptions(parser)
     parser.add_argument("--camera", dest="camera", default="lsstSim",
-        help="Name of desired camera (defaults to %(default)s)")
+                        help="Name of desired camera (defaults to %(default)s)")
     parser.add_argument("database", help="Name of database to create and "
                         "instantiate the LSST schema in.")
     ns = parser.parse_args()
@@ -100,4 +101,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

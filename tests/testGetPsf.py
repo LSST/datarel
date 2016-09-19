@@ -24,7 +24,7 @@
 
 import unittest
 
-import lsst.utils.tests as utilsTests
+import lsst.utils.tests
 
 from lsst.datarel.utils import getPsf
 import lsst.daf.persistence as dafPersist
@@ -46,22 +46,15 @@ class GetPsfTest(unittest.TestCase):
         psf = getPsf(butler, "calexp", dataId, strict=False, warn=False)
         self.assertEqual(psf, None)
 
-#####
+
+class MemoryTester(lsst.utils.tests.MemoryTestCase):
+    pass
 
 
-def suite():
-    """Returns a suite containing all the test cases in this module."""
-    utilsTests.init()
+def setup_module(module):
+    lsst.utils.tests.init()
 
-    suites = []
-    suites += unittest.makeSuite(GetPsfTest)
-    suites += unittest.makeSuite(utilsTests.MemoryTestCase)
-    return unittest.TestSuite(suites)
-
-
-def run(shouldExit=False):
-    """Run the tests"""
-    utilsTests.run(suite(), shouldExit)
 
 if __name__ == "__main__":
-    run(True)
+    lsst.utils.tests.init()
+    unittest.main()

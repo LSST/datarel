@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-# 
+#
 # LSST Data Management System
 # Copyright 2008, 2009, 2010 LSST Corporation.
-# 
+#
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
 #
@@ -11,14 +11,14 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
-# You should have received a copy of the LSST License Statement and 
-# the GNU General Public License along with this program.  If not, 
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
@@ -40,6 +40,7 @@ to dataset, although they can be reordered.
 """
 
 from __future__ import with_statement
+from __future__ import print_function
 from optparse import OptionParser
 import os
 import shutil
@@ -48,6 +49,7 @@ try:
 except ImportError:
     # try external pysqlite package; deprecated
     import sqlite as sqlite3
+
 
 def rowGenerator(inputData):
     """Interpret the job office text file specified by the inputData pathname,
@@ -77,7 +79,7 @@ def rowGenerator(inputData):
                 val = words[i][pos + 1:]
                 if rowNum <= 1:
                     if key in cols:
-                        raise RuntimeError, "Duplicate key: %s" % (key,)
+                        raise RuntimeError("Duplicate key: %s" % (key,))
                     if key in intIds:
                         cols[key] = -i
                     else:
@@ -85,12 +87,13 @@ def rowGenerator(inputData):
                     row.append(None)
                 pos = cols[key]
                 if pos < 0:
-                    row[(-pos)-1] = int(val)
+                    row[(-pos) - 1] = int(val)
                 else:
-                    row[pos-1] = val
+                    row[pos - 1] = val
             if rowNum == 1:
                 yield cols
             yield row
+
 
 def main(inputRegistry, outputRegistry, inputData):
     """Trim the SQLite3 file specified by the inputRegistry pathname,
@@ -99,73 +102,73 @@ def main(inputRegistry, outputRegistry, inputData):
     the inputData pathname to select rows out of the registry."""
 
     if not os.path.exists(inputRegistry):
-        raise RuntimeError, "Registry not found"
+        raise RuntimeError("Registry not found")
     if os.path.exists(outputRegistry):
-        raise RuntimeError, "Output registry already exists"
+        raise RuntimeError("Output registry already exists")
     shutil.copyfile(inputRegistry, outputRegistry)
     with sqlite3.connect(outputRegistry) as db:
         gen = rowGenerator(inputData)
-        cols = gen.next()
+        cols = next(gen)
         schema = [None for _ in xrange(len(cols))]
         for k, v in cols.iteritems():
             if v < 0:
-                schema[(-v)-1] = "%s INT" % (k,)
+                schema[(-v) - 1] = "%s INT" % (k,)
             else:
-                schema[v-1] = "%s TEXT" % (k,)
+                schema[v - 1] = "%s TEXT" % (k,)
         cmd = "CREATE TABLE selector (" + ", ".join(schema) + ")"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "INSERT INTO selector VALUES (" + ", ".join(["?" for _ in
-                xrange(len(cols))]) + ")"
-        print cmd
+                                                           xrange(len(cols))]) + ")"
+        print(cmd)
         db.executemany(cmd, gen)
         cmd = "CREATE TABLE new_raw AS " + \
-                "SELECT raw.* FROM raw, selector WHERE " + " AND ".join(
-                        ["raw.%s = selector.%s" % (col, col)
-                        for col in cols.iterkeys()])
-        print cmd
+            "SELECT raw.* FROM raw, selector WHERE " + " AND ".join(
+                ["raw.%s = selector.%s" % (col, col)
+                 for col in cols.iterkeys()])
+        print(cmd)
         db.execute(cmd)
         cmd = "CREATE TABLE new_raw_skyTile AS " + \
-                "SELECT * from raw_skyTile " + \
-                "WHERE id IN (SELECT id FROM new_raw)"
-        print cmd
+            "SELECT * from raw_skyTile " + \
+            "WHERE id IN (SELECT id FROM new_raw)"
+        print(cmd)
         db.execute(cmd)
         cmd = "CREATE TABLE new_raw_visit AS " + \
-                "SELECT * from raw_visit " + \
-                "WHERE visit IN (SELECT DISTINCT visit FROM new_raw)"
-        print cmd
+            "SELECT * from raw_visit " + \
+            "WHERE visit IN (SELECT DISTINCT visit FROM new_raw)"
+        print(cmd)
         db.execute(cmd)
         cmd = "CREATE UNIQUE INDEX pk_id ON new_raw (id)"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "CREATE UNIQUE INDEX pk_visit ON new_raw_visit (visit)"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         db.commit()
 
         cmd = "DROP TABLE raw"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "DROP TABLE raw_skyTile"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "DROP TABLE raw_visit"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "DROP TABLE selector"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "ALTER TABLE new_raw RENAME TO raw"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "ALTER TABLE new_raw_skyTile RENAME TO raw_skyTile"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "ALTER TABLE new_raw_visit RENAME TO raw_visit"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         cmd = "VACUUM"
-        print cmd
+        print(cmd)
         db.execute(cmd)
         db.commit()
 
@@ -175,12 +178,12 @@ usage: %prog [options] INPUTREGISTRY INPUTDATA
 
 INPUTDATA is an input file for the job office.""")
     parser.add_option("-o", "--output", dest="output",
-            default="newreg.sqlite3",
-            help="output registry (default=newreg.sqlite3)")
+                      default="newreg.sqlite3",
+                      help="output registry (default=newreg.sqlite3)")
     (options, args) = parser.parse_args()
     if len(args) < 2:
         parser.error("Missing input registry or input data file")
     inputData = args[1]
     if not os.path.exists(inputData):
-        raise RuntimeError, "Missing input data file: %s" % (inputData,)
+        raise RuntimeError("Missing input data file: %s" % (inputData,))
     main(args[0], options.output, inputData)

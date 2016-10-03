@@ -1,9 +1,9 @@
 #! /usr/bin/env python
 
-# 
+#
 # LSST Data Management System
 # Copyright 2008, 2009, 2010 LSST Corporation.
-# 
+#
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
 #
@@ -11,20 +11,21 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
-# You should have received a copy of the LSST License Statement and 
-# the GNU General Public License along with this program.  If not, 
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
+from __future__ import print_function
 import argparse
-import os
 import string
+import sys
 
 from lsst.datarel.mysqlExecutor import MysqlExecutor, addDbOptions
 from prepareDb import loadTables
@@ -52,7 +53,7 @@ import transposeMetadata
 #    )
 # );
 #
-# UPDATE $table 
+# UPDATE $table
 # SET stringValue = NULL
 # WHERE stringValue RLIKE '[[:blank:]]*[Nn][Uu][Ll]{2}[[:blank:]]*' AND metadataKey IN (
 #     SELECT DISTINCT metadataKey FROM XXX_Exposure_Metadata
@@ -107,8 +108,8 @@ fixupTemplate = string.Template("""
 
 
 metadataTables = {
-    "lsstsim" : ["Raw_Amp_Exposure_Metadata", "Science_Ccd_Exposure_Metadata"],
-    "sdss"    : ["Science_Ccd_Exposure_Metadata"],
+    "lsstsim": ["Raw_Amp_Exposure_Metadata", "Science_Ccd_Exposure_Metadata"],
+    "sdss": ["Science_Ccd_Exposure_Metadata"],
 }
 
 
@@ -123,7 +124,7 @@ def findInconsistentMetadataTypes(sql, camera):
             FROM (
                 SELECT DISTINCT metadataKey, IF(stringValue IS NOT NULL, "string",
                     IF(intValue IS NOT NULL, "int", "double")) AS type
-                FROM {} 
+                FROM {}
                 WHERE stringValue IS NOT NULL OR
                       intValue IS NOT NULL OR
                       doubleValue IS NOT NULL
@@ -132,24 +133,23 @@ def findInconsistentMetadataTypes(sql, camera):
             HAVING n > 1;
             """, table))
         if len(keys) > 0:
-            print table + " has inconsistent types for metadata keys:"
+            print(table + " has inconsistent types for metadata keys:")
             for k in keys:
-                print "{}:\t{}".format(k[0], k[2])
+                print("{}:\t{}".format(k[0], k[2]))
             sys.stdout.flush()
             needsFix.append(table)
     return needsFix
 
 
 def main():
-    parser = argparse.ArgumentParser(description=
-        "Program which runs post-processing steps on an LSST run database, "
-        "including enabling the table indexes that prepareDb.py disables to "
-        "speed up loading. Metadata tables are checked for type consistency "
-        "and fixed up if necessary, and key-value metadata tables are optionally "
-        "transposed into column-per-value tables.")
+    parser = argparse.ArgumentParser(description="Program which runs post-processing steps on an LSST run "
+                                     "database, including enabling the table indexes that prepareDb.py "
+                                     "disables to speed up loading. Metadata tables are checked for type "
+                                     "consistency and fixed up if necessary, and key-value metadata tables "
+                                     "are optionally transposed into column-per-value tables.")
     addDbOptions(parser)
     parser.add_argument("--camera", dest="camera", default="lsstSim",
-        help="Name of desired camera (defaults to %(default)s)")
+                        help="Name of desired camera (defaults to %(default)s)")
     parser.add_argument(
         "-t", "--transpose", action="store_true", dest="transpose",
         help="Flag that causes key-value metadata tables to be transposed to "
@@ -157,7 +157,7 @@ def main():
     parser.add_argument("database", help="Name of database to post-process.")
 
     ns = parser.parse_args()
-    if ns.user == None:
+    if ns.user is None:
         parser.error("No database user name specified and $USER is undefined or empty")
     sql = MysqlExecutor(ns.host, ns.database, ns.user, ns.port)
     camera = ns.camera.lower()
@@ -166,7 +166,7 @@ def main():
             camera, loadTables.keys()))
     # Enable indexes on tables for faster queries
     tables = loadTables[camera] + ["Logs", "RunSource", "RunObject",
-            "RunGoodSeeingSource", "RunGoodSeeingForcedSource"]
+                                   "RunGoodSeeingSource", "RunGoodSeeingForcedSource"]
     for table in tables:
         if sql.isView(table) or not sql.exists(table):
             continue
@@ -175,17 +175,17 @@ def main():
     # fixup metadata tables if necessary
     fixTables = findInconsistentMetadataTypes(sql, camera)
     if len(fixTables) > 0:
-        print "\nattempting to fix type inconsistencies"
+        print("\nattempting to fix type inconsistencies")
     for table in fixTables:
         stmt = fixupTemplate.substitute({"table": table})
         sql.execStmt(stmt)
     if len(fixTables) > 0:
-        print "\nVerifying that all inconsistencies were fixed..."
+        print("\nVerifying that all inconsistencies were fixed...")
         fixTables = findInconsistentMetadataTypes(sql, camera)
     if len(fixTables) > 0:
-        print "\n... inconsistencies remain!"
+        print("\n... inconsistencies remain!")
         if ns.transpose:
-            print "\nCannot transpose metadata tables with inconsistent types!"
+            print("\nCannot transpose metadata tables with inconsistent types!")
     elif ns.transpose:
         # Generate transposed metadata tables
         if "Raw_Amp_Exposure_Metadata" in metadataTables[camera]:
@@ -220,7 +220,7 @@ def main():
                                   'TIME-MID', 'EXPTIME',
                                   'RDNOISE', 'SATURATE', 'GAINEFF',
                                   'FLUXMAG0', 'FLUXMAG0ERR',
-                                 ])
+                                  ])
             transposeMetadata.run(ns.host, ns.port, ns.user,
                                   sql.password, ns.database,
                                   "Science_Ccd_Exposure_Metadata",
@@ -230,4 +230,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

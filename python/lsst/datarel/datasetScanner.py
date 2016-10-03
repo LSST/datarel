@@ -1,7 +1,7 @@
-# 
+#
 # LSST Data Management System
 # Copyright 2012 LSST Corporation.
-# 
+#
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
 #
@@ -9,26 +9,27 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
-# You should have received a copy of the LSST License Statement and 
-# the GNU General Public License along with this program.  If not, 
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 import os
 import os.path
 import re
 import lsst.daf.butlerUtils
+from functools import reduce
 
 __all__ = ['getMapperClass',
            'parseDataIdRules',
            'HfsScanner',
            'DatasetScanner',
-          ]
+           ]
 
 
 _mapperClassName = {
@@ -112,7 +113,7 @@ def parseDataIdRules(ruleList, camera):
 
     This function parses a list of such strings, and returns a dict mapping
     keys to sets of legal values.
-    
+
     ruleList:
         List of rule strings
     camera:
@@ -163,16 +164,19 @@ class _FormatKey(object):
         derived from the given key, value, and existing entries. The
         _mungeStr and _mungeInt functions are examples.
     """
+
     def __init__(self, spec, typ, munge):
         self.spec = spec
         self.typ = typ
         self.munge = munge
+
 
 def _mungeStr(k, v, dataId):
     """Munger for keys with string formats."""
     kv = dataId.copy()
     kv[k] = str(v)
     return kv
+
 
 def _mungeInt(k, v, dataId):
     """Munger for keys with integer formats."""
@@ -197,6 +201,7 @@ class _PathComponent(object):
         True if regex is a simple string literal rather than a pattern.
         In this case, keys will always by None or [].
     """
+
     def __init__(self, keys, regex, simple):
         self.keys = keys
         self.regex = regex
@@ -207,6 +212,7 @@ class HfsScanner(object):
     """A hierarchical scanner for paths matching a template, optionally
     also restricting visited paths to those matching a list of dataId rules.
     """
+
     def __init__(self, template):
         """Build an FsScanner for given a path template. The path template
         should be a Python string with named format substitution
@@ -221,9 +227,9 @@ class HfsScanner(object):
         """
         template = os.path.normpath(template)
         if (len(template) == 0 or
-            template == os.curdir or
-            template[0] == os.sep or
-            template[-1] == os.sep):
+                template == os.curdir or
+                template[0] == os.sep or
+                template[-1] == os.sep):
             raise RuntimeError(
                 'Path template is empty, absolute, or identifies a directory')
         self._formatKeys = {}
@@ -241,7 +247,7 @@ class HfsScanner(object):
                 simple = False
                 spec = m.group(0)
                 k = m.group(1)
-                seenBefore = self._formatKeys.has_key(k)
+                seenBefore = k in self._formatKeys
                 # transform format spec into a regular expression
                 regex += re.escape(component[last:m.start(0)])
                 last = m.end(0)
@@ -267,7 +273,7 @@ class HfsScanner(object):
                     self._formatKeys[k] = _FormatKey(spec, typ, munge)
             regex += re.escape(component[last:])
             if simple:
-                regex = component # literal match
+                regex = component  # literal match
             else:
                 regex = re.compile('^' + regex + '$')
             self._pathComponents.append(_PathComponent(newKeys, regex, simple))
@@ -320,7 +326,7 @@ class HfsScanner(object):
                                         newRules.append(r)
                                 subRules = newRules
                             if not subRules:
-                                continue # no rules matched
+                                continue  # no rules matched
                     # Have path matching template and at least one rule
                     p = os.path.join(path, e)
                     if depth < len(self._pathComponents):
@@ -333,7 +339,7 @@ class HfsScanner(object):
                             oneFound = True
             # end while stack
             root = os.path.join(root, "_parent")
-    
+
 
 # -- Camera specific dataId mungers ----
 
@@ -359,6 +365,7 @@ def _mungeLsstSim(k, v, dataId):
         dataId[k] = v
     return dataId
 
+
 def _mungeSdss(k, v, dataId):
     dataId = dataId.copy()
     if _keyTypes['sdss'][k] == int:
@@ -366,6 +373,7 @@ def _mungeSdss(k, v, dataId):
     else:
         dataId[k] = v
     return dataId
+
 
 def _mungeCfht(k, v, dataId):
     dataId = dataId.copy()
@@ -378,7 +386,7 @@ def _mungeCfht(k, v, dataId):
     elif _keyTypes['sdss'][k] == int:
         dataId[k] = int(v)
     else:
-        dataId[k] = v 
+        dataId[k] = v
     return dataId
 
 _mungeFunctions = {
@@ -391,6 +399,7 @@ _mungeFunctions = {
 class DatasetScanner(HfsScanner):
     """File system scanner for a dataset known to a camera mapper.
     """
+
     def __init__(self, dataset, camera, cameraMapper):
         if not isinstance(cameraMapper, lsst.daf.butlerUtils.CameraMapper):
             raise TypeError('Expecting a lsst.daf.butlerUtils.CameraMapper!')
@@ -404,4 +413,3 @@ class DatasetScanner(HfsScanner):
             if k not in _keyTypes[camera]:
                 raise RuntimeError('{} is not a valid dataId key for camera {}'.format(k, camera))
             self._formatKeys[k].munge = _mungeFunctions[camera]
-

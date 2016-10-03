@@ -1,7 +1,7 @@
-# 
+#
 # LSST Data Management System
 # Copyright 2008, 2009, 2010, 2012 LSST Corporation.
-# 
+#
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
 #
@@ -9,30 +9,26 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
-# You should have received a copy of the LSST License Statement and 
-# the GNU General Public License along with this program.  If not, 
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 import argparse
-from itertools import izip
-import os, os.path
-import re
 import shlex
-import sys
 
-import lsst.daf.persistence as dafPersist
 from .mysqlExecutor import addDbOptions
 from .datasetScanner import parseDataIdRules
 
 __all__ = ["makeArgumentParser",
            "makeRules",
-          ]
+           ]
+
 
 def _line_to_args(self, line):
     for arg in shlex.split(line, comments=True, posix=True):
@@ -84,7 +80,7 @@ def makeArgumentParser(description, inRootsRequired=True, addRegistryOption=True
     parser.add_argument(
         "-d", "--database", dest="database",
         help="MySQL database to load CSV files into.")
-    parser.add_argument(  
+    parser.add_argument(
         "-s", "--strict", dest="strict", action="store_true",
         help="Error out if previously ingested, incomplete, or otherwise "
              "suspicious data items are encountered (by default, these are "
@@ -119,4 +115,3 @@ def makeRules(dataIdSpecs, camera, validKeys):
                 raise RuntimeError(k + " is not a legal data ID key for this ingest script")
         rules.append(r)
     return rules
-

@@ -1,9 +1,9 @@
 #! /usr/bin/env python
 
-# 
+#
 # LSST Data Management System
 # Copyright 2008, 2009, 2010 LSST Corporation.
-# 
+#
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
 #
@@ -11,33 +11,37 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
-# You should have received a copy of the LSST License Statement and 
-# the GNU General Public License along with this program.  If not, 
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 from __future__ import with_statement
+from __future__ import print_function
 from contextlib import closing
 import getpass
 import argparse
+import os
 import MySQLdb as sql
 from lsst.daf.persistence import DbAuth
 
 from lsst.datarel.mysqlExecutor import addDbOptions
 
-renames = { 'DEC': 'DECL',
-            'OUTFILE': 'OUTFILE_'
-          }
+renames = {'DEC': 'DECL',
+           'OUTFILE': 'OUTFILE_'
+           }
+
 
 class Column(object):
+
     def __init__(self, name, type):
         self.name = name
-        self.type = type 
+        self.type = type
         self.dbtype = None
         self.notNull = False
         self.minVal = None
@@ -45,7 +49,7 @@ class Column(object):
         self.constVal = None
 
     def computeAttributes(self, cursor, metadataTable, compress):
-        print "Computing attributes for metadataKey: " + self.name
+        print("Computing attributes for metadataKey: " + self.name)
         cursor.execute(
             "SELECT count(*) FROM %s WHERE metadataKey='%s' AND %sValue IS NULL;" %
             (metadataTable, self.name, self.type))
@@ -66,28 +70,28 @@ class Column(object):
                     "SELECT %sValue FROM %s WHERE metadataKey='%s' AND %sValue != '%s' LIMIT 1;" %
                     (self.type, metadataTable, self.name, self.type, val))
                 rows = cursor.fetchone()
-                if rows == None or len(rows) == 0:
+                if rows is None or len(rows) == 0:
                     self.constVal = val
         else:
             cursor.execute("SELECT MIN(%sValue), MAX(%sValue) FROM %s WHERE metadataKey='%s';" %
-                (self.type, self.type, metadataTable, self.name))
+                           (self.type, self.type, metadataTable, self.name))
             self.minVal, self.maxVal = cursor.fetchone()
             if self.type == "int":
-               if self.minVal >= -128 and self.maxVal <= 127:
-                   self.dbtype = "TINYINT"
-               elif self.minVal >= -23768 and self.maxVal <= 32767:
-                   self.dbtype = "SMALLINT"
-               else:
-                   self.dbtype = "INTEGER"
+                if self.minVal >= -128 and self.maxVal <= 127:
+                    self.dbtype = "TINYINT"
+                elif self.minVal >= -23768 and self.maxVal <= 32767:
+                    self.dbtype = "SMALLINT"
+                else:
+                    self.dbtype = "INTEGER"
             else:
-               self.dbtype = "DOUBLE";
+                self.dbtype = "DOUBLE"
             if self.notNull and self.minVal == self.maxVal and compress:
                 self.constVal = self.maxVal
 
     def getDbName(self):
         if self.name in renames:
             return renames[self.name]
-        return self.name.replace("-","_")
+        return self.name.replace("-", "_")
 
     def getColumnSpec(self):
         constraint = ""
@@ -104,6 +108,7 @@ class Column(object):
 
 
 class OutputTable(object):
+
     def __init__(self, name, idCol, columns):
         self.name = name
         self.idCol = idCol
@@ -111,19 +116,19 @@ class OutputTable(object):
 
     def create(self, cursor, metadataTable):
         createStmt = "CREATE TABLE %s (\n    %s BIGINT NOT NULL PRIMARY KEY" % (self.name, self.idCol)
-        cols = ",\n".join([c.getColumnSpec() for c in self.columns if c.constVal == None])
+        cols = ",\n".join([c.getColumnSpec() for c in self.columns if c.constVal is None])
         if len(cols) > 0:
             createStmt += ",\n"
             createStmt += cols
         createStmt += "\n);"
-        print createStmt
+        print(createStmt)
         cursor.execute(createStmt)
         cursor.fetchall()
-        if any(c.constVal != None for c in self.columns):
+        if any(c.constVal is not None for c in self.columns):
             # Create a VIEW which provides columns for metadataKeys with constant values
             viewStmt = "CREATE VIEW %s_View AS SELECT *" % self.name
             for c in self.columns:
-                if c.constVal != None:
+                if c.constVal is not None:
                     viewStmt += ",\n    "
                     if c.type == "string":
                         viewStmt += "'%s' AS %s" % (c.constVal, c.getDbName())
@@ -132,23 +137,23 @@ class OutputTable(object):
                     else:
                         viewStmt += "%s AS %s" % (str(c.constVal), c.getDbName())
             viewStmt += "\nFROM %s;" % metadataTable
-            print viewStmt
+            print(viewStmt)
             cursor.execute(viewStmt)
             cursor.fetchall()
 
     def populate(self, cursor, metadataTable):
-        print "Storing " + self.idCol + " values"
+        print("Storing " + self.idCol + " values")
         cursor.execute("INSERT INTO %s (%s) SELECT DISTINCT %s FROM %s;" %
-            (self.name, self.idCol, self.idCol, metadataTable))
+                       (self.name, self.idCol, self.idCol, metadataTable))
         cursor.fetchall()
         for c in self.columns:
-            if c.constVal == None:
-                print "Storing values for " + c.name
+            if c.constVal is None:
+                print("Storing values for " + c.name)
                 cursor.execute(
                     """UPDATE %s AS a INNER JOIN %s AS b
                        ON (a.%s = b.%s AND b.metadataKey = '%s')
                        SET a.%s = b.%sValue;""" %
-                    (self.name, metadataTable, self.idCol, self.idCol,c.name, c.getDbName(), c.type))
+                    (self.name, metadataTable, self.idCol, self.idCol, c.name, c.getDbName(), c.type))
                 cursor.fetchall()
 
 
@@ -171,12 +176,14 @@ def getColumns(cursor, metadataTable, skipCols):
         columns.append(Column(*row))
     return columns
 
+
 def hostPort(sv):
     hp = sv.split(':')
     if len(hp) > 1:
         return (hp[0], int(hp[1]))
     else:
         return (hp[0], None)
+
 
 def run(host, port, user, passwd, database,
         metadataTable, idCol, outputTable,
@@ -211,11 +218,11 @@ def run(host, port, user, passwd, database,
             table.create(cursor, metadataTable)
             table.populate(cursor, metadataTable)
 
+
 def main():
     # Setup command line options
-    parser = argparse.ArgumentParser(description=
-        "Program which transposes a key-value table into a table where each key is"
-        "mapped to a column.")
+    parser = argparse.ArgumentParser(description="Program which transposes a key-value table into a table "
+                                     "where each key is mapped to a column.")
     addDbOptions(parser)
     parser.add_argument(
         "-s", "--skip-keys", dest="skipKeys",
@@ -230,7 +237,7 @@ def main():
     parser.add_argument(
         "idCol", help="Primary key column name for metadata table")
     parser.add_argument(
-        "outputTable", help="Name of output table to create") 
+        "outputTable", help="Name of output table to create")
     ns = parser.parse_args()
     db, metadataTable, idCol, outputTable = args
     if DbAuth.available(ns.host, str(ns.port)):
@@ -241,11 +248,10 @@ def main():
     else:
         passwd = getpass.getpass("%s's MySQL password: " % ns.user)
     skipCols = set()
-    if opts.skipKeys != None:
-        skipCols = set(map(lambda x: x.strip(), opts.skipKeys.split(",")))
+    if opts.skipKeys is not None:
+        skipCols = set([x.strip() for x in opts.skipKeys.split(",")])
     run(ns.host, ns.port, ns.user, passwd, db, metadataTable,
         idCol, outputTable, skipCols, ns.compress)
- 
+
 if __name__ == "__main__":
     main()
-

@@ -1,7 +1,7 @@
-# 
+#
 # LSST Data Management System
 # Copyright 2008, 2009, 2010 LSST Corporation.
-# 
+#
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
 #
@@ -9,18 +9,19 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
-# You should have received a copy of the LSST License Statement and 
-# the GNU General Public License along with this program.  If not, 
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
 from __future__ import with_statement
+from __future__ import print_function
 from contextlib import closing
 import getpass
 import MySQLdb as sql
@@ -32,12 +33,13 @@ from lsst.daf.persistence import DbAuth
 
 
 class MysqlExecutor(object):
+
     def __init__(self, host, database, user, port=3306, password=None):
         self.host = host
         self.port = port
         self.user = user
         self.database = database
-        if password == None:
+        if password is None:
             if self.host is not None and self.port is not None and \
                     DbAuth.available(self.host, str(self.port)):
                 self.user = DbAuth.username(self.host, str(self.port))
@@ -89,7 +91,7 @@ class MysqlExecutor(object):
                 cmd += ['-D', self.database]
             cmd += options
             subprocess.check_call(cmd, stdin=f,
-                    stdout=sys.stdout, stderr=sys.stderr)
+                                  stdout=sys.stdout, stderr=sys.stderr)
             sys.stdout.flush()
             sys.stderr.flush()
 
@@ -98,7 +100,7 @@ class MysqlExecutor(object):
             raise TypeError('Query is not a string')
         with closing(self.getConn()) as conn:
             with closing(conn.cursor()) as cursor:
-                print query
+                print(query)
                 sys.stdout.flush()
                 cursor.execute(query)
                 return cursor.fetchall()
@@ -137,7 +139,7 @@ class MysqlExecutor(object):
 def addDbOptions(parser):
     if not isinstance(parser, argparse.ArgumentParser):
         raise TypeError('Expecting an argparse.ArgumentParser')
-    defUser = (os.environ.has_key('USER') and os.environ['USER']) or None
+    defUser = ('USER' in os.environ and os.environ['USER']) or None
     parser.add_argument(
         "--user", default=defUser, dest="user",
         help="MySQL database user name (%(default)s).")
@@ -147,4 +149,3 @@ def addDbOptions(parser):
     parser.add_argument(
         "--port", default=3306, type=int, dest="port",
         help="MySQL database server port (%(default)d).")
-

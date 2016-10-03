@@ -273,7 +273,7 @@ class HfsScanner(object):
                     self._formatKeys[k] = _FormatKey(spec, typ, munge)
             regex += re.escape(component[last:])
             if simple:
-                regex = component # literal match
+                regex = component  # literal match
             else:
                 regex = re.compile('^' + regex + '$')
             self._pathComponents.append(_PathComponent(newKeys, regex, simple))
@@ -326,7 +326,7 @@ class HfsScanner(object):
                                         newRules.append(r)
                                 subRules = newRules
                             if not subRules:
-                                continue # no rules matched
+                                continue  # no rules matched
                     # Have path matching template and at least one rule
                     p = os.path.join(path, e)
                     if depth < len(self._pathComponents):

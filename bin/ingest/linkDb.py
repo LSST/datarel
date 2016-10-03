@@ -29,8 +29,9 @@ from lsst.datarel.mysqlExecutor import MysqlExecutor, addDbOptions
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Program which \"links\" an LSST per-run database into the well-known "
-                                     "database name buildbot_weekly_latest by creating views for each table.")
+    parser = argparse.ArgumentParser(description="Program which \"links\" an LSST per-run database "
+                                     " into the well-known database name buildbot_weekly_latest by creating "
+                                     "views for each table.")
     addDbOptions(parser)
     parser.add_argument(
         "-t", "--tag", dest="type", default="tags", choices=["trunk", "tags"],

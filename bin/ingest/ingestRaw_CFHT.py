@@ -32,7 +32,6 @@ from textwrap import dedent
 import lsst.daf.base as dafBase
 import lsst.daf.persistence as dafPersist
 from lsst.obs.cfht import CfhtMapper
-import lsst.afw.coord as afwCoord
 import lsst.afw.image as afwImage
 
 from lsst.datarel.csvFileWriter import CsvFileWriter
@@ -115,7 +114,7 @@ class CsvGenerator(object):
                                filterMap.index(md.get('FILTER').strip()),
                                cen.getRa().asDegrees(), cen.getDec().asDegrees(),
                                md.get('EQUINOX'),
-                               md.get('RADECSYS'), # note wrong name
+                               md.get('RADECSYS'),  # note wrong name
                                md.get('CTYPE1'), md.get('CTYPE2'),
                                md.get('CRPIX1'), md.get('CRPIX2'),
                                md.get('CRVAL1'), md.get('CRVAL2'),
@@ -128,7 +127,7 @@ class CsvGenerator(object):
                                obsStart.get(dafBase.DateTime.MJD, dafBase.DateTime.TAI),
                                obsStart, obsMidpoint.toString(dafBase.DateTime.UTC), expTime,
                                md.get('AIRMASS'), md.get('DARKTIME'),
-                               None) # ZENITH is missing
+                               None)  # ZENITH is missing
             for name in md.paramNames():
                 if md.typeOf(name) == md.TYPE_Int:
                     self.mdFile.write(rawAmpExposureId, name, 1,

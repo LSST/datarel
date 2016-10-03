@@ -20,14 +20,8 @@
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 import argparse
-from itertools import izip
-import os
-import os.path
-import re
 import shlex
-import sys
 
-import lsst.daf.persistence as dafPersist
 from .mysqlExecutor import addDbOptions
 from .datasetScanner import parseDataIdRules
 

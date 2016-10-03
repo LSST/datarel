@@ -32,7 +32,6 @@ from textwrap import dedent
 import lsst.daf.base as dafBase
 import lsst.daf.persistence as dafPersist
 from lsst.obs.lsstSim import LsstSimMapper
-import lsst.afw.coord as afwCoord
 import lsst.afw.image as afwImage
 
 from lsst.datarel.csvFileWriter import CsvFileWriter
@@ -109,10 +108,10 @@ class CsvGenerator(object):
                                                   visit=visit, snap=snap,
                                                   raft=raft, sensor=sensor, channel=channel)
                     except:
-                        print(("*** Unable to read metadata for " +
-                               "visit %d snap %d " +
-                               "raft %s sensor %s channel %s") % \
-                            (visit, snap, raft, sensor, channel))
+                        print("*** Unable to read metadata for "
+                              "visit %d snap %d "
+                              "raft %s sensor %s channel %s" %
+                              (visit, snap, raft, sensor, channel))
                         continue
 
                     self.rToSFile.write(rawAmpExposureId, sciCcdExposureId,

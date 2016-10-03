@@ -24,16 +24,13 @@
 
 from __future__ import print_function
 import math
-import argparse
 import os
 import subprocess
 import sys
 
 import lsst.daf.base as dafBase
 import lsst.daf.persistence as dafPersistence
-import lsst.afw.coord as afwCoord
 import lsst.afw.image as afwImage
-import lsst.afw.geom as afwGeom
 import lsst.meas.algorithms as measAlg
 
 from lsst.datarel.csvFileWriter import CsvFileWriter
@@ -63,7 +60,7 @@ bytesPerPixel = 4 + 2 + 4
 minExposureSize = {
     'lsstsim': bytesPerPixel*4000*4000,
     'sdss': bytesPerPixel*2048*1361,
-    'cfht': bytesPerPixel*1*1, # TODO: what dimensions are appropriate here?
+    'cfht': bytesPerPixel*1*1,  # TODO: what dimensions are appropriate here?
 }
 
 
@@ -174,8 +171,8 @@ class CsvGenerator(object):
         elif self.camera == 'sdss':
             filterId = afwImage.Filter(dataId['filter'], False).getId()
             # compute start-of-exposure time from middle-of-exposure time and exposure duration
-            expTime = md.get('EXPTIME') # s
-            halfExpTimeNs = long(round(expTime * 500000000.0)) # 0.5 * expTime in ns
+            expTime = md.get('EXPTIME')  # s
+            halfExpTimeNs = long(round(expTime * 500000000.0))  # 0.5 * expTime in ns
             obsStart = dafBase.DateTime(
                 dafBase.DateTime(md.get('TIME-MID')).nsecs(dafBase.DateTime.TAI) - halfExpTimeNs,
                 dafBase.DateTime.TAI)

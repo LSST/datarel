@@ -24,8 +24,8 @@
 
 from __future__ import print_function
 import argparse
-import os
 import string
+import sys
 
 from lsst.datarel.mysqlExecutor import MysqlExecutor, addDbOptions
 from prepareDb import loadTables
@@ -124,7 +124,7 @@ def findInconsistentMetadataTypes(sql, camera):
             FROM (
                 SELECT DISTINCT metadataKey, IF(stringValue IS NOT NULL, "string",
                     IF(intValue IS NOT NULL, "int", "double")) AS type
-                FROM {} 
+                FROM {}
                 WHERE stringValue IS NOT NULL OR
                       intValue IS NOT NULL OR
                       doubleValue IS NOT NULL
@@ -142,11 +142,11 @@ def findInconsistentMetadataTypes(sql, camera):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Program which runs post-processing steps on an LSST run database, "
-                                     "including enabling the table indexes that prepareDb.py disables to "
-                                     "speed up loading. Metadata tables are checked for type consistency "
-                                     "and fixed up if necessary, and key-value metadata tables are optionally "
-                                     "transposed into column-per-value tables.")
+    parser = argparse.ArgumentParser(description="Program which runs post-processing steps on an LSST run "
+                                     "database, including enabling the table indexes that prepareDb.py "
+                                     "disables to speed up loading. Metadata tables are checked for type "
+                                     "consistency and fixed up if necessary, and key-value metadata tables "
+                                     "are optionally transposed into column-per-value tables.")
     addDbOptions(parser)
     parser.add_argument("--camera", dest="camera", default="lsstSim",
                         help="Name of desired camera (defaults to %(default)s)")

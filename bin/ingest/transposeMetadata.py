@@ -26,6 +26,7 @@ from __future__ import print_function
 from contextlib import closing
 import getpass
 import argparse
+import os
 import MySQLdb as sql
 from lsst.daf.persistence import DbAuth
 

@@ -249,7 +249,7 @@ def main():
         passwd = getpass.getpass("%s's MySQL password: " % ns.user)
     skipCols = set()
     if opts.skipKeys is not None:
-        skipCols = set(map(lambda x: x.strip(), opts.skipKeys.split(",")))
+        skipCols = set([x.strip() for x in opts.skipKeys.split(",")])
     run(ns.host, ns.port, ns.user, passwd, db, metadataTable,
         idCol, outputTable, skipCols, ns.compress)
 

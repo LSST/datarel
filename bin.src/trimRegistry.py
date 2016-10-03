@@ -87,9 +87,9 @@ def rowGenerator(inputData):
                     row.append(None)
                 pos = cols[key]
                 if pos < 0:
-                    row[(-pos)-1] = int(val)
+                    row[(-pos) - 1] = int(val)
                 else:
-                    row[pos-1] = val
+                    row[pos - 1] = val
             if rowNum == 1:
                 yield cols
             yield row
@@ -112,9 +112,9 @@ def main(inputRegistry, outputRegistry, inputData):
         schema = [None for _ in xrange(len(cols))]
         for k, v in cols.iteritems():
             if v < 0:
-                schema[(-v)-1] = "%s INT" % (k,)
+                schema[(-v) - 1] = "%s INT" % (k,)
             else:
-                schema[v-1] = "%s TEXT" % (k,)
+                schema[v - 1] = "%s TEXT" % (k,)
         cmd = "CREATE TABLE selector (" + ", ".join(schema) + ")"
         print(cmd)
         db.execute(cmd)

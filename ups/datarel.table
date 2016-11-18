@@ -7,7 +7,8 @@ setupOptional(obs_lsstSim)
 setupOptional(astrometry_net_data)
 setupOptional(matplotlib)	# used by some debugging routines
 setupOptional(cat)
-setupOptional(scisql)
+# see DM-8260
+# setupOptional(scisql)
 
 envPrepend(PYTHONPATH, ${PRODUCT_DIR}/python)
 envPrepend(PATH, ${PRODUCT_DIR}/bin/sst)

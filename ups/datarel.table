@@ -7,7 +7,9 @@ setupOptional(obs_lsstSim)
 setupOptional(astrometry_net_data)
 setupOptional(matplotlib)	# used by some debugging routines
 setupOptional(cat)
-setupOptional(scisql)
+# scisql is needed by scripts under ./bin/ingest it is being removed as a dep
+# because it is blocking py3 compatibility
+#setupOptional(scisql)
 
 envPrepend(PYTHONPATH, ${PRODUCT_DIR}/python)
 envPrepend(PATH, ${PRODUCT_DIR}/bin/sst)

@@ -31,7 +31,6 @@ import sys
 import lsst.daf.base as dafBase
 import lsst.daf.persistence as dafPersistence
 import lsst.afw.image as afwImage
-import lsst.meas.algorithms as measAlg
 
 from lsst.datarel.csvFileWriter import CsvFileWriter
 from lsst.datarel.mysqlExecutor import MysqlExecutor
@@ -152,8 +151,7 @@ class CsvGenerator(object):
         corner3 = wcs.pixelToSky(x0 + width - 0.5, y0 + height - 0.5).toIcrs()
         corner4 = wcs.pixelToSky(x0 + width - 0.5, y0 - 0.5).toIcrs()
         # compute FWHM
-        attr = measAlg.PsfAttributes(psf, x0 + width // 2, y0 + height // 2)
-        fwhm = attr.computeGaussianWidth() * wcs.pixelScale().asArcseconds() * sigmaToFwhm
+        fwhm = psf.computeShape().getDeterminantRadius() * wcs.pixelScale().asArcseconds() * sigmaToFwhm
         # Build array of column values for one Science_Ccd_Exposure metadata row
         record = [scienceCcdExposureId]
         if self.camera in ('lsstsim', 'cfht'):
